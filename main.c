@@ -4,10 +4,6 @@
 #define F_CPU 8000000UL
 
 void one_pulse(void);
-void two_pulses(void);
-void multiple_pulses(void);
-
-
 
 
 int main(void)
@@ -23,16 +19,6 @@ int main(void)
 }
 
 void one_pulse(void)
-{
-
-}
-
-void two_pulses(void)
-{
-
-}
-
-void multiple_pulses(void)
 {
 
 }
