@@ -1,10 +1,8 @@
 #include <avr/io.h>
+#define F_CPU 1000000UL
 #include <util/delay.h>
 
-#define F_CPU 8000000UL
-
 void one_pulse(void);
-
 
 int main(void)
 {
@@ -12,13 +10,11 @@ int main(void)
   DDRD = 0xf0;
   DDRA |= 0x07;
 
-  while(1)
-  {
-    PORTA = 0x01;
-  }
 }
 
 void one_pulse(void)
 {
-
+  PORTA |= 0x05;
+  _delay_ms(1000);
+  PORTA = 0x00;
 }
