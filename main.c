@@ -4,7 +4,7 @@
 
 void one_pulse(void);
 void search (void);
-int r1=0, x=0, c1=0 , output;
+int r=0, x=0, c1=0 , output;
 char database[4][4]= {1, 2, 3, 'A', 4, 5, 6, 'B', 7, 8, 9, 'C', '*', 0, '#', 'D'};
 
 
@@ -33,28 +33,28 @@ while(1)
 		x=PIND;
 		if (x!=0xef)
 		{
-			r1=0;
+			r=0;
 			search();
 		}
 		PORTD = 0xdf;
 		x=PIND;
 		if (x!=0xdf)
 		{
-			r1=1;
+			r=1;
 			search();
 		}
 		PORTD = 0xbf;
 		x=PIND;
 		if (x!=0xbf)
 		{
-			r1=2;
+			r=2;
 			search();
 		}
 		PORTD = 0x7f;
 		x=PIND;
 		if (x!=0x7f)
 		{
-			r1=3;
+			r=3;
 			search();
 		}
 }
@@ -73,20 +73,20 @@ void search (void)
 	
 	if (x==0X0e)
 	{
-		output = database[r1][0];
+		output = database[r][0];
 		
 	}
 	if (x==0X0d)
 	{
-		output = database[r1][1];
+		output = database[r][1];
 	}
 	if (x==0X0b)
 	{
-		output = database[r1][2];
+		output = database[r][2];
 	}
 	if (x==0X07)
 	{
-		output = database[r1][3];
+		output = database[r][3];
 	}
 
 	
