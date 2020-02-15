@@ -61,7 +61,7 @@ int main(void)
 	PORTC=0xff;
 	/*PortC's lower 4 bits are given high value and pull-up are enabled for upper 4 bits*/
 
-	unsigned char count=0, keypad_value, password_status=0;
+	unsigned char keypad_value, count=0, password_status=0, attempts = 0;
 	char password_set[6], password_entered[6];
 
 	password_set[0] = 49;
@@ -87,122 +87,148 @@ int main(void)
 	lcd_string_write(";)");
 	/*String display in 2nd row of LCD*/
 
-	_delay_ms(500);
-	_delay_ms(500);
-	_delay_ms(500);
-	_delay_ms(500);
-	/*Display stays for 2 second*/
+	_delay_ms(1000);
+	/*Display stays for 1 second*/
 
-	lcd_command_write(0x01);
-	/*Clear screen*/
-
-	lcd_string_write("Enter Password");
-	/*String display in 1st row of LCD*/
-
-	/*While loop for password entry and checking*/
-	while(password_status==0x00)
+	while (1)
 	{
-		lcd_command_write(0xc0);
-		/*Cursor moves to 2nd row 1st column of LCD*/
-
-		/*While loop for 4 digit password entry*/
-		while(count<5)
-		{
-			keypad_value=read_keypad();
-			/*Scan's 4X4 keypad and returns pressed key value or default value*/
-
-			/*Checking if any key is pressed or not*/
-			if(keypad_value != 0xff)
-			{
-				password_entered[count]=keypad_value+48;
-				/*Storing the pressed key value of 4X4 keypad in ASCII format*/
-
-				count++;
-				/*Counter increment*/
-
-				lcd_data_write('*');
-				/* Star(*) is displayed in 2nd row of LCD*/
-			}
-			else
-			{
-				;
-				/*Null statement*/
-			}
-
-			_delay_ms(300);
-			/*300ms delay as guard time between two consecutive pressing of key*/
-		}
-		count=0;
-		/*Counter reset to 0*/
-
-		password_entered[5]=0;
-		/*Null character at the last of array(password_entered) to convert it to a string*/
-
 		lcd_command_write(0x01);
 		/*Clear screen*/
 
-		/*Password Comparision*/
-		if(!(strcmp(password_set,password_entered)))
-		{
-			lcd_string_write("Correct Password");
-			/*String display in 1st row of LCD*/
+		lcd_string_write("Enter Password");
+		/*String display in 1st row of LCD*/
 
-			password_status=1;
-			/*Changing the Password Status to Correct Password*/
-		}
-		else
+		/*While loop for password entry and checking*/
+		while(password_status==0x00 && attempts != 3)
 		{
-			lcd_string_write("Wrong Password");
-			/*String display in 1st row of LCD*/
+			lcd_command_write(0xc0);
+			/*Cursor moves to 2nd row 1st column of LCD*/
 
-			_delay_ms(500);
-			_delay_ms(500);
-			_delay_ms(500);
-			_delay_ms(500);
-			/*Display stays for 2 second*/
+			/*While loop for 4 digit password entry*/
+			while(count<5)
+			{
+				keypad_value=read_keypad();
+				/*Scan's 4X4 keypad and returns pressed key value or default value*/
+
+				/*Checking if any key is pressed or not*/
+				if(keypad_value != 0xff)
+				{
+					password_entered[count]=keypad_value+48;
+					/*Storing the pressed key value of 4X4 keypad in ASCII format*/
+
+					count++;
+					/*Counter increment*/
+
+					lcd_data_write('*');
+					/* Star(*) is displayed in 2nd row of LCD*/
+				}
+				else
+				{
+					;
+					/*Null statement*/
+				}
+
+				_delay_ms(300);
+				/*300ms delay as guard time between two consecutive pressing of key*/
+			}
+			count=0;
+			/*Counter reset to 0*/
+
+			password_entered[5]=0;
+			/*Null character at the last of array(password_entered) to convert it to a string*/
 
 			lcd_command_write(0x01);
 			/*Clear screen*/
 
-			lcd_string_write("Reenter Password");
-			/*String display in 1st row of LCD*/
+			/*Password Comparision*/
+			if(!(strcmp(password_set,password_entered)))
+			{
+				lcd_string_write("Correct Password");
+				/*String display in 1st row of LCD*/
+
+				password_status=1;
+				/*Changing the Password Status to Correct Password*/
+			}
+			else
+			{
+				attempts = attempts + 1;
+				/* increment wrong attempts value by one */
+
+				lcd_string_write("Wrong Password");
+				/*String display in 1st row of LCD*/
+
+				for (int i = 0; i < 5; i++)
+				{
+					one_pulse();
+				}
+
+				if (attempts < 3)
+				{
+					lcd_command_write(0x01);
+					/*Clear screen*/
+
+					lcd_string_write("Reenter Password");
+					/*String display in 1st row of LCD*/
+				}
+			}
 		}
-	}
-
-	_delay_ms(500);
-	_delay_ms(500);
-	_delay_ms(500);
-	_delay_ms(500);
-	/*Display stays for 2 second*/
-
-	lcd_command_write(0x01);
-	/*Clear Screen*/
-
-	if (password_status == 1)
-	{
-		lcd_command_write(0x80);
-		/*Cursor moves to 1st row 1st column of LCD*/
-
-		lcd_string_write("Openning...");
-		/*String display in 1st row of LCD*/
-
-		one_pulse();
-		one_pulse();
-		PORTA = 0x0a;
-
-		_delay_ms(5000);
-
-		PORTA = 0x00;
 
 		lcd_command_write(0x01);
 		/*Clear Screen*/
 
-		lcd_command_write(0x80);
-		/*Cursor moves to 1st row 1st column of LCD*/
+		if (password_status == 0)
+		{
+			lcd_command_write(0x01);
+			/*Clear Screen*/
 
-		lcd_string_write("Closed");
-		/*String display in 1st row of LCD*/
+			lcd_command_write(0x80);
+			/*Cursor moves to 1st row 1st column of LCD*/
 
+			lcd_string_write("GET LOST");
+			/*String display in 1st row of LCD*/
+
+			_delay_ms(5000);
+
+			count=0;
+			password_entered[5]=0;
+			password_status = 0;
+			attempts = 0;
+			/* reset */
+		}
+
+		if (password_status == 1)
+		{
+			lcd_command_write(0x80);
+			/*Cursor moves to 1st row 1st column of LCD*/
+
+			lcd_string_write("Unlocked");
+			/*String display in 1st row of LCD*/
+
+			one_pulse();
+			one_pulse();
+			PORTA = 0x0a;
+
+			_delay_ms(5000);
+
+			PORTA = 0x00;
+
+			lcd_command_write(0x01);
+			/*Clear Screen*/
+
+			lcd_command_write(0x80);
+			/*Cursor moves to 1st row 1st column of LCD*/
+
+			lcd_string_write("Locked");
+			/*String display in 1st row of LCD*/
+
+			_delay_ms(1000);
+
+			count=0;
+			password_entered[5]=0;
+			password_status = 0;
+			attempts = 0;
+			/* reset */
+		}
 	}
 
 	/*Start of infinite loop*/
@@ -460,4 +486,3 @@ void lcd_string_write(char *string)
 	while (*string)
 	lcd_data_write(*string++);
 }
-
